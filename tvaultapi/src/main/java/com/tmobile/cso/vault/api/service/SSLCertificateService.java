@@ -8046,8 +8046,8 @@ public ResponseEntity<String> getRevocationReasons(Integer certificateId, String
 						if(certificateUpdateRequest.getProjectLeadEmail()!=null) {
 						metaDataParams.put("projectLeadEmailId", certificateUpdateRequest.getProjectLeadEmail());
 						}
-						}else if((certificateUpdateRequest.getApplicationOwnerEmail()!=null && !certificateUpdateRequest.getApplicationOwnerEmail().equalsIgnoreCase(metaDataParams.get("applicationOwnerEmailId"))
-								||(certificateUpdateRequest.getProjectLeadEmail()!=null && !certificateUpdateRequest.getProjectLeadEmail().equalsIgnoreCase(metaDataParams.get("projectLeadEmailId"))))){
+						}else if(!((certificateUpdateRequest.getApplicationOwnerEmail()==null ?true: certificateUpdateRequest.getApplicationOwnerEmail().equalsIgnoreCase(metaDataParams.get("applicationOwnerEmailId")))
+								&& (certificateUpdateRequest.getProjectLeadEmail()==null ?true: certificateUpdateRequest.getProjectLeadEmail().equalsIgnoreCase(metaDataParams.get("projectLeadEmailId"))))){
 						
 							return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 									.body("{\"errors\":[\""
