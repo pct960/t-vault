@@ -7974,11 +7974,13 @@ public ResponseEntity<String> getRevocationReasons(Integer certificateId, String
 
 			    	boolean isValidData = false;
 			    	int count =0;
+			    	String[] notifEmailLst =new String[] {};
 			    	if(isValidInputs(certificateUpdateRequest.getCertificateName(), certificateUpdateRequest.getCertType()) && (certificateUpdateRequest.getApplicationOwnerEmail()!=null ? validateCertficateEmail(certificateUpdateRequest.getApplicationOwnerEmail()):true)
 			    			&& (certificateUpdateRequest.getProjectLeadEmail()!=null ? validateCertficateEmail(certificateUpdateRequest.getProjectLeadEmail() ):true)) {
 			    		isValidData = true;
 			    		if(certificateUpdateRequest.getNotificationEmail()!=null) {
-			    			String[] notifEmailLst =   certificateUpdateRequest.getNotificationEmail().split(",");
+			    			notifEmailLst =   certificateUpdateRequest.getNotificationEmail().split(",");
+			    			notifEmailLst = new HashSet<String>(Arrays.asList(notifEmailLst)).toArray(new String[0]);
 			    			for(int i=0; i<notifEmailLst.length;i++) {
 			    				if(validateCertficateEmail(notifEmailLst[i] )) {
 			    					count++;
@@ -8005,7 +8007,7 @@ public ResponseEntity<String> getRevocationReasons(Integer certificateId, String
 							if (!isPermission) {
 								return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 										.body("{\"errors\":[\""
-												+ "Access denied: No permission to renew certificate"
+												+ "Access denied: No permission to update certificate"
 												+ "\"]}");
 							}
 						}
@@ -8037,13 +8039,23 @@ public ResponseEntity<String> getRevocationReasons(Integer certificateId, String
 						JsonObject object = ((JsonObject) jsonParser.parse(response.getResponse())).getAsJsonObject("data");
 						metaDataParams = new Gson().fromJson(object.toString(), Map.class);	
 						boolean sslMetaDataUpdationStatus;
-						if(certificateUpdateRequest.getApplicationOwnerEmail()!=null ) {
+						if(userDetails.isAdmin()) {
+						if(certificateUpdateRequest.getApplicationOwnerEmail()!=null  ) {
 						metaDataParams.put("applicationOwnerEmailId", certificateUpdateRequest.getApplicationOwnerEmail());
 						}
 						if(certificateUpdateRequest.getProjectLeadEmail()!=null) {
 						metaDataParams.put("projectLeadEmailId", certificateUpdateRequest.getProjectLeadEmail());
-						}if(certificateUpdateRequest.getNotificationEmail()!=null ){						
-						metaDataParams.put("notificationEmails", certificateUpdateRequest.getNotificationEmail());
+						}
+						}else if(!((certificateUpdateRequest.getApplicationOwnerEmail()==null ?true: certificateUpdateRequest.getApplicationOwnerEmail().equalsIgnoreCase(metaDataParams.get("applicationOwnerEmailId")))
+								&& (certificateUpdateRequest.getProjectLeadEmail()==null ?true: certificateUpdateRequest.getProjectLeadEmail().equalsIgnoreCase(metaDataParams.get("projectLeadEmailId"))))){
+						
+							return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+									.body("{\"errors\":[\""
+											+ "Access denied: No permission to update application owner or project lead emails"
+											+ "\"]}");
+						}
+						if(certificateUpdateRequest.getNotificationEmail()!=null ){						
+						metaDataParams.put("notificationEmails", String.join(",", notifEmailLst));
 						}
 					try {
 					if (userDetails.isAdmin()) {
@@ -8066,17 +8078,17 @@ public ResponseEntity<String> getRevocationReasons(Integer certificateId, String
 			                    build()));
 
 						return ResponseEntity.status(HttpStatus.OK)
-								.body("{\"messages\":[\"" + "Certificate metadata updated successfully" + "\"]}");
+								.body("{\"messages\":[\"" + "Certificate details updated successfully" + "\"]}");
 					} else {
 						log.error(JSONUtil.getJSON(ImmutableMap.<String, String>builder()
 								.put(LogMessage.USER, ThreadLocalContext.getCurrentMap().get(LogMessage.USER).toString())
 								.put(LogMessage.ACTION, "updateSSLCertificate")
-								.put(LogMessage.MESSAGE, "Certificate metadata updation failed")
+								.put(LogMessage.MESSAGE, "Certificate details updation failed")
 								.put(LogMessage.STATUS, HttpStatus.INTERNAL_SERVER_ERROR.toString())
 								.put(LogMessage.APIURL, ThreadLocalContext.getCurrentMap().get(LogMessage.APIURL).toString())
 								.build()));
 						return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-								.body("{\"errors\":[\"" + "Certificate metadata updation failed" + "\"]}");
+								.body("{\"errors\":[\"" + "Certificate details updation failed" + "\"]}");
 					}
 
 					}
