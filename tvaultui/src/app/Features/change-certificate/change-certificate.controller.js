@@ -161,7 +161,8 @@
                 }
                 else {                    
                     $rootScope.showDetails = true;
-                    $rootScope.activeDetailsTab = 'details';                    
+                    $rootScope.activeDetailsTab = 'details';   
+                    $scope.requestDataFrChangeCertificate();
                 }
             }
             else {
@@ -1109,7 +1110,7 @@
                 }	
             $scope.notificationEmailErrorMessage = '';	
             $scope.leadEmailErrorMessage ="";	
-            angular.element('#notificationEmailList').empty();
+            
             var Difference_In_Time = new Date(certDetails.expiryDate).getTime() - new Date().getTime() ;
             var Difference_In_Days = Math.round(Difference_In_Time / (1000 * 3600 * 24));
             console.log("AppConstant.VALID_RENEW_DAYS"+AppConstant.VALID_RENEW_DAYS);
@@ -1310,7 +1311,7 @@
                 }	
             $scope.notificationEmailErrorMessage = '';	
             $scope.leadEmailErrorMessage ="";	
-            angular.element('#notificationEmailList').empty();
+            
             try{
                 $scope.isLoadingData = true;
                 Modal.close();
@@ -1663,7 +1664,7 @@
                 $scope.certDnsErrorMessage = '';	
                 for (var i=0;i<$scope.notificationEmails.length;i++) {	
                 	if($scope.notificationEmails[i]!=undefined && $scope.notificationEmails[i].email){	
-                    if (email.toLowerCase() == $scope.notificationEmails[i].email.toLowerCase()) {	
+                    if (email.toLowerCase() == $scope.notificationEmails[i].email.toLowerCase().trim()) {	
                         $scope.notificationEmailErrorMessage = 'Duplicate Email';	
                         return true;	
                     }	
