@@ -1468,6 +1468,7 @@
         }
 
         $scope.selectNotificationEmail = function (ownerEmail) {
+        	$scope.notificationEmailErrorMessage = '';
         	$scope.notificationEmail = { email:""};
             if (ownerEmail != null) {
                 $scope.notificationEmail.email = ownerEmail.userEmail;
